@@ -44,7 +44,9 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
-        
+        //collections
+        const usersCollection = client.db("summerCampDB").collection("users");
+        const coursesCollection = client.db("summerCampDB").collection("courses");
 
 
         //jwt
@@ -54,7 +56,17 @@ async function run() {
             res.send({ token })
         })
 
-        
+        //users
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result)
+        });
+
+
+        app.get('/courses', async (req, res) => {
+            const result = await coursesCollection.find().toArray();
+            res.send(result)
+        });
 
 
 
