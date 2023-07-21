@@ -48,6 +48,7 @@ async function run() {
         const usersCollection = client.db("summerCampDB").collection("users");
         const coursesCollection = client.db("summerCampDB").collection("courses");
         const instructorsCollection = client.db("summerCampDB").collection("instructors");
+        const cartCollection = client.db("summerCampDB").collection("carts");
 
 
         //jwt
@@ -63,18 +64,24 @@ async function run() {
             res.send(result)
         });
 
+        //carts
+        app.post('/carts', async (req, res) => {
+            const courseItem = req.body;
+            const result = await cartCollection.insertOne(courseItem);
+            res.send(result)
+        })
 
+        //courses
         app.get('/courses', async (req, res) => {
             const result = await coursesCollection.find().toArray();
             res.send(result)
         });
+
+        //instructors
         app.get('/instructors', async (req, res) => {
-            const result = await coursesCollection.find().toArray();
+            const result = await instructorsCollection.find().toArray();
             res.send(result)
         });
-
-
-
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
