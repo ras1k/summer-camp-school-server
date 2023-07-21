@@ -47,6 +47,7 @@ async function run() {
         //collections
         const usersCollection = client.db("summerCampDB").collection("users");
         const coursesCollection = client.db("summerCampDB").collection("courses");
+        const instructorsCollection = client.db("summerCampDB").collection("instructors");
 
 
         //jwt
@@ -64,6 +65,10 @@ async function run() {
 
 
         app.get('/courses', async (req, res) => {
+            const result = await coursesCollection.find().toArray();
+            res.send(result)
+        });
+        app.get('/instructors', async (req, res) => {
             const result = await coursesCollection.find().toArray();
             res.send(result)
         });
