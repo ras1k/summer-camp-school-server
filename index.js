@@ -178,10 +178,18 @@ async function run() {
             res.send(result)
         });
 
+        //classes
+        app.post('/classes', verifyJWT, async (req, res) => {
+            const newItem = req.body;
+            const result = await classCollection.insertOne(newItem);
+            res.send(result)
+        })
+
         app.get('/classes', async (req, res) => {
             const result = await classCollection.find().toArray();
             res.send(result)
           });
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
