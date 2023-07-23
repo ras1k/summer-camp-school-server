@@ -8,12 +8,14 @@ const {
     ObjectId
 } = require('mongodb');
 require('dotenv').config();
+
 const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
 app.use(express.json());
 
+//jwt
 const verifyJWT = (req, res, next) => {
     const authorization = req.headers.authorization;
     if (!authorization) {
@@ -56,7 +58,7 @@ async function run() {
         const classCollection = client.db("summerCampDB").collection("classes");
 
 
-        //jwt
+        //jwt api
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
@@ -86,7 +88,7 @@ async function run() {
             const email = req.params.email;
 
             if (req.decoded.email !== email) {
-                res.send({ admin: false })
+                return res.send({ admin: false })
             }
 
             const query = { email: email }
@@ -113,9 +115,8 @@ async function run() {
             const email = req.params.email;
 
             if (req.decoded.email !== email) {
-                res.send({ admin: false })
+               return res.send({ admin: false })
             }
-
 
             const query = { email: email }
             const user = await usersCollection.findOne(query);
@@ -188,7 +189,7 @@ async function run() {
         app.get('/classes', async (req, res) => {
             const result = await classCollection.find().toArray();
             res.send(result)
-          });
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
@@ -202,9 +203,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Server is running')
+    res.send('School Server is running')
 });
 
 app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`)
+    console.log(`School Server is running on port: ${port}`)
 })
