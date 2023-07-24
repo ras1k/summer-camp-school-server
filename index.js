@@ -9,6 +9,9 @@ const {
 } = require('mongodb');
 require('dotenv').config();
 
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.PAYMENT_SECRET_KEY);
+
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -56,6 +59,7 @@ async function run() {
         const instructorsCollection = client.db("summerCampDB").collection("instructors");
         const cartCollection = client.db("summerCampDB").collection("carts");
         const classCollection = client.db("summerCampDB").collection("classes");
+        const paymentCollection = client.db('bistroDB').collection('payments');
 
 
         //jwt api
@@ -115,7 +119,7 @@ async function run() {
             const email = req.params.email;
 
             if (req.decoded.email !== email) {
-               return res.send({ admin: false })
+                return res.send({ admin: false })
             }
 
             const query = { email: email }
@@ -190,6 +194,31 @@ async function run() {
             const result = await classCollection.find().toArray();
             res.send(result)
         });
+
+        //payment intent
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+        //payment
+        app.post('/payments', verifyJWT, async (req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+
+            const query = { id: { $in: payment.cartItems.map(id => new ObjectId(id)) } };
+            const deleteResult = await cartCollection.deleteMany(query)
+            res.send({ result, deleteResult })
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
