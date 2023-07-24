@@ -59,7 +59,7 @@ async function run() {
         const instructorsCollection = client.db("summerCampDB").collection("instructors");
         const cartCollection = client.db("summerCampDB").collection("carts");
         const classCollection = client.db("summerCampDB").collection("classes");
-        const paymentCollection = client.db('bistroDB').collection('payments');
+        const paymentCollection = client.db('summerCampDB').collection('payments');
 
 
         //jwt api
@@ -164,6 +164,13 @@ async function run() {
             res.send(result)
         });
 
+        app.get('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await cartCollection.findOne(query);
+            res.send(result)
+        })
+
         app.delete('/carts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -192,6 +199,19 @@ async function run() {
 
         app.get('/classes', async (req, res) => {
             const result = await classCollection.find().toArray();
+            res.send(result)
+        });
+
+        app.patch('/classes/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'paid'
+                },
+            };
+
+            const result = await classCollection.updateOne(filter, updateDoc);
             res.send(result)
         });
 
